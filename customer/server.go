@@ -8,6 +8,7 @@ import (
 
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/charge"
+	"github.com/stripe/stripe-go/customer"
 )
 
 var (
@@ -40,9 +41,8 @@ func chargeHandler(w http.ResponseWriter, r *http.Request) {
 	token := r.PostFormValue("stripeToken")
 	log.Println(token)
 
-	params := &stripe.ChargeParams{
-		Amount:   2000,
-		Currency: "jpy",
+	params := &stripe.CustomerParams{
+		Desc: "Stripe Developer",
 	}
 	err := params.SetSource(token)
 	if err != nil {
@@ -51,8 +51,18 @@ func chargeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ch, err := charge.New(params)
+	customer, err := customer.New(params)
+	if err != nil {
+		log.Println("Failed to create a customer")
+		log.Fatal(err)
+		return
+	}
 
+	ch, err := charge.New(&stripe.ChargeParams{
+		Amount:   2000,
+		Currency: "jpy",
+		Customer: customer.ID,
+	})
 	if err != nil {
 		log.Println("Failed to charge a credit card")
 		log.Fatal(err)
