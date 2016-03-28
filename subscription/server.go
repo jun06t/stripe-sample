@@ -7,7 +7,6 @@ import (
 	"os"
 
 	stripe "github.com/stripe/stripe-go"
-	"github.com/stripe/stripe-go/charge"
 	"github.com/stripe/stripe-go/customer"
 )
 
@@ -43,7 +42,8 @@ func chargeHandler(w http.ResponseWriter, r *http.Request) {
 
 	params := &stripe.CustomerParams{
 		Email: email,
-		Desc:  "Stripe Developer",
+		Desc:  "Subscription user",
+		Plan:  "standard",
 	}
 	err := params.SetSource(token)
 	if err != nil {
@@ -59,18 +59,7 @@ func chargeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ch, err := charge.New(&stripe.ChargeParams{
-		Amount:   2000,
-		Currency: "jpy",
-		Customer: customer.ID,
-	})
-	if err != nil {
-		log.Println("Failed to charge a credit card")
-		log.Fatal(err)
-		return
-	}
-
-	log.Println(ch.ID)
+	log.Println(customer.ID)
 }
 
 func main() {
