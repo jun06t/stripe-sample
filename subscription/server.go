@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -35,6 +37,19 @@ func checkoutHandler(w http.ResponseWriter, r *http.Request) {
 	pubKey := TemplateVars{PublishableKey: template.HTML(publishableKey)}
 	t := template.Must(template.ParseFiles("./checkout.html"))
 	t.Execute(w, pubKey)
+}
+
+func webhookHandler(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	body := make(map[string]interface{})
+	err := decoder.Decode(&body)
+	if err != nil {
+		log.Println("Failed to decode json")
+		log.Fatal(err)
+		return
+	}
+
+	fmt.Printf("%#v\n", body)
 }
 
 func chargeHandler(w http.ResponseWriter, r *http.Request) {
@@ -76,5 +91,6 @@ func main() {
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/checkout", checkoutHandler)
 	http.HandleFunc("/charge", chargeHandler)
+	http.HandleFunc("/webhook", webhookHandler)
 	http.ListenAndServe(":3000", nil)
 }
