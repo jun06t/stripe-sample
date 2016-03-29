@@ -8,6 +8,7 @@ import (
 
 	stripe "github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/customer"
+	"github.com/stripe/stripe-go/sub"
 )
 
 var (
@@ -43,7 +44,6 @@ func chargeHandler(w http.ResponseWriter, r *http.Request) {
 	params := &stripe.CustomerParams{
 		Email: email,
 		Desc:  "Subscription user",
-		Plan:  "standard",
 	}
 	err := params.SetSource(token)
 	if err != nil {
@@ -59,7 +59,17 @@ func chargeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(customer.ID)
+	s, err := sub.New(&stripe.SubParams{
+		Customer: customer.ID,
+		Plan:     "lite",
+	})
+	if err != nil {
+		log.Println("Failed to create subscription")
+		log.Fatal(err)
+		return
+	}
+
+	log.Println(s.ID)
 }
 
 func main() {
