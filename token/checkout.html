@@ -1,0 +1,18 @@
+<html>
+  <head>
+    <title>Stripe - Chekcout Example</title>
+  </head>
+  <body>
+    <form action="/charge" method="POST">
+      <script
+        src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+        data-key="{{ .PublishableKey }}"
+        data-name="ExampleCompany"
+        data-description="Sample Product"
+        data-currency="jpy"
+        data-amount="2000"
+        data-locale="auto">
+      </script>
+    </form>
+  </body>
+</html>
