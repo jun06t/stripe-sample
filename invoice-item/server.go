@@ -55,8 +55,10 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		object := make(map[string]interface{})
 		json.Unmarshal(event.Data.Raw, &object)
 		customerID := object["customer"].(string)
+		invoiceID := object["id"].(string)
 
 		_, err = invoiceitem.New(&stripe.InvoiceItemParams{
+			Invoice:  invoiceID,
 			Customer: customerID,
 			Amount:   10,
 			Currency: "jpy",
