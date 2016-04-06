@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -49,26 +48,30 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 		return
 	}
-	fmt.Printf("%#v\n", event)
 
-	if event.Type == "invoice.created" {
-		object := make(map[string]interface{})
-		json.Unmarshal(event.Data.Raw, &object)
-		customerID := object["customer"].(string)
-		invoiceID := object["id"].(string)
+	if event.Type != "invoice.created" {
+		return
+	}
 
-		_, err = invoiceitem.New(&stripe.InvoiceItemParams{
-			Invoice:  invoiceID,
-			Customer: customerID,
-			Amount:   10,
-			Currency: "jpy",
-			Desc:     "Sales Tax",
-		})
-		if err != nil {
-			log.Println("Failed to create invoice item")
-			log.Fatal(err)
-			return
-		}
+	closed := event.GetObjValue("closed")
+	if closed == "true" {
+		return
+	}
+
+	customerID := event.GetObjValue("customer")
+	invoiceID := event.GetObjValue("id")
+
+	_, err = invoiceitem.New(&stripe.InvoiceItemParams{
+		Invoice:  invoiceID,
+		Customer: customerID,
+		Amount:   10,
+		Currency: "jpy",
+		Desc:     "Sales Tax",
+	})
+	if err != nil {
+		log.Println("Failed to create invoice item")
+		log.Fatal(err)
+		return
 	}
 
 	return
